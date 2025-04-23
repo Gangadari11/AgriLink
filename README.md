@@ -34,7 +34,7 @@ AgriLink is a comprehensive platform connecting farmers directly with buyers, el
 
 ## 📂 Project Structure
 
-\`\`\`
+```
 /
 ├── client/                 # React frontend
 │   ├── public/             # Static files
@@ -56,7 +56,7 @@ AgriLink is a comprehensive platform connecting farmers directly with buyers, el
     ├── models/             # ML models
     ├── schemas/            # Pydantic schemas
     └── utils/              # Utility functions
-\`\`\`
+```
 
 ## 🛠️ Setup Instructions
 
@@ -68,33 +68,33 @@ AgriLink is a comprehensive platform connecting farmers directly with buyers, el
 
 ### Frontend Setup
 1. Navigate to the client directory:
-   \`\`\`
+   ```
    cd client
-   \`\`\`
+   ```
 2. Install dependencies:
-   \`\`\`
+   ```
    npm install
-   \`\`\`
+   ```
 3. Create a `.env` file with the following variables:
-   \`\`\`
+   ```
    REACT_APP_API_URL=http://localhost:5000/api
-   \`\`\`
+   ```
 4. Start the development server:
-   \`\`\`
+   ```
    npm start
-   \`\`\`
+   ```
 
 ### Backend Setup
 1. Navigate to the server directory:
-   \`\`\`
+   ```
    cd server
-   \`\`\`
+   ```
 2. Install dependencies:
-   \`\`\`
+   ```
    npm install
-   \`\`\`
+   ```
 3. Create a `.env` file with the following variables:
-   \`\`\`
+   ```
    PORT=5000
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
@@ -105,34 +105,34 @@ AgriLink is a comprehensive platform connecting farmers directly with buyers, el
    PAYHERE_CANCEL_URL=http://localhost:3000/payment/cancel
    PAYHERE_NOTIFY_URL=http://localhost:5000/api/payments/notify
    ML_API_URL=http://localhost:8000
-   \`\`\`
+   ```
 4. Start the development server:
-   \`\`\`
+   ```
    npm run dev
-   \`\`\`
+   ```
 
 ### ML API Setup
 1. Navigate to the ml-api directory:
-   \`\`\`
+   ```
    cd ml-api
-   \`\`\`
+   ```
 2. Create a virtual environment:
-   \`\`\`
+   ```
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   \`\`\`
+   ```
 3. Install dependencies:
-   \`\`\`
+   ```
    pip install -r requirements.txt
-   \`\`\`
+   ```
 4. Create a `.env` file with the following variables:
-   \`\`\`
+   ```
    PORT=8000
-   \`\`\`
+   ```
 5. Start the development server:
-   \`\`\`
+   ```
    uvicorn main:app --reload
-   \`\`\`
+   ```
 
 ## 🚢 Deployment
 
@@ -163,22 +163,22 @@ API documentation is available at:
 ## 🧪 Testing
 
 ### Frontend Testing
-\`\`\`
+```
 cd client
 npm test
-\`\`\`
+```
 
 ### Backend Testing
-\`\`\`
+```
 cd server
 npm test
-\`\`\`
+```
 
 ### ML API Testing
-\`\`\`
+```
 cd ml-api
 pytest
-\`\`\`
+```
 
 ## 📄 License
 
