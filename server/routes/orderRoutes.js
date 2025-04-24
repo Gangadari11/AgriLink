@@ -167,3 +167,43 @@ router.route("/:id/status").put(protect, farmerOrAdmin, updateOrderStatus)
  * @swagger
  * /api/orders/{id}/pay:
  *   put:
+ *     summary: Update order to paid
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - paymentResult
+ *             properties:
+ *               paymentResult:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   update_time:
+ *                     type: string
+ *                   email_address:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Order updated to paid
+ *       404:
+ *         description: Order not found
+ */
+router.route("/:id/pay").put(protect, updateOrderToPaid)
+
+module.exports = router

@@ -1,211 +1,318 @@
 "use client"
 
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useLocation } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { logoutUser } from "../../redux/slices/authSlice"
-import { FaBars, FaTimes, FaShoppingCart } from "react-icons/fa"
+import { logout } from "../../redux/slices/authSlice"
+import { FiMenu, FiX, FiShoppingCart, FiUser, FiGlobe } from "react-icons/fi"
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { isAuthenticated, user } = useSelector((state) => state.auth)
-  const { totalItems } = useSelector((state) => state.cart)
+  const [language, setLanguage] = useState("English")
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false)
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
+
+  const location = useLocation()
   const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const { isAuthenticated, user } = useSelector((state) => state.auth)
+  const { items } = useSelector((state) => state.cart)
+
+  const cartItemCount = items.reduce((total, item) => total + item.quantity, 0)
+
+  const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "Shop", href: "/shop" },
+    { name: "List Produce", href: "/list-produce" },
+    { name: "Insights", href: "/insights" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
+  ]
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true)
+      } else {
+        setIsScrolled(false)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [location])
 
   const handleLogout = () => {
-    dispatch(logoutUser())
-    navigate("/login")
+    dispatch(logout())
   }
 
   const getDashboardLink = () => {
-    if (!user) return "/login"
+    if (!user) return "/"
 
     switch (user.role) {
       case "farmer":
-        return "/farmer"
+        return "/farmer/dashboard"
       case "buyer":
-        return "/buyer"
+        return "/buyer/dashboard"
       case "admin":
-        return "/admin"
+        return "/admin/dashboard"
       default:
         return "/"
     }
   }
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <img className="h-8 w-auto" src="/logo.png" alt="AgriLink" />
-              <span className="ml-2 text-xl font-bold text-primary-600">AgriLink</span>
-            </Link>
+    <header
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <img
+              src="/logo.png"
+              alt="AgriLink Logo"
+              className="h-10 w-10 mr-2"
+              onError={(e) => {
+                e.target.onerror = null
+                e.target.src = "https://via.placeholder.com/40x40?text=AL"
+              }}
+            />
+            <span className="text-xl font-bold text-agri-primary">AgriLink</span>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-4">
-              <Link to="/" className="nav-link">
-                Home
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`text-sm font-medium transition-colors hover:text-agri-primary ${
+                  location.pathname === link.href ? "text-agri-primary" : "text-gray-600"
+                }`}
+              >
+                {link.name}
               </Link>
-              <Link to="/marketplace" className="nav-link">
-                Marketplace
-              </Link>
-              <Link to="/about" className="nav-link">
-                About
-              </Link>
-              <Link to="/contact" className="nav-link">
-                Contact
-              </Link>
-            </div>
-          </div>
+            ))}
+          </nav>
 
-          <div className="flex items-center">
-            {/* Desktop Buttons */}
-            <div className="hidden sm:flex sm:items-center sm:space-x-2">
-              {isAuthenticated ? (
-                <>
-                  {user.role === "buyer" && (
-                    <Link to="/buyer/cart" className="relative p-1 text-gray-700 hover:text-primary-600">
-                      <FaShoppingCart className="h-6 w-6" />
-                      {totalItems > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs text-white">
-                          {totalItems}
-                        </span>
-                      )}
-                    </Link>
-                  )}
+          {/* Right Side - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Language Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
+                className="flex items-center text-gray-600 hover:text-agri-primary"
+              >
+                <FiGlobe className="mr-1" />
+                <span className="text-sm">{language}</span>
+              </button>
 
-                  <div className="relative ml-3">
-                    <div>
-                      <button
-                        type="button"
-                        className="flex rounded-full bg-primary-100 text-sm focus:outline-none"
-                        id="user-menu-button"
-                        onClick={() => navigate(getDashboardLink())}
-                      >
-                        <span className="sr-only">Open user menu</span>
-                        <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <button onClick={handleLogout} className="btn btn-outline">
-                    Logout
+              {isLanguageDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-1 z-10">
+                  <button
+                    onClick={() => {
+                      setLanguage("English")
+                      setIsLanguageDropdownOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    English
                   </button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" className="btn btn-outline">
-                    Login
-                  </Link>
-                  <Link to="/register" className="btn btn-primary">
-                    Register
-                  </Link>
-                </>
+                  <button
+                    onClick={() => {
+                      setLanguage("සිංහල")
+                      setIsLanguageDropdownOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    සිංහල
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage("தமிழ்")
+                      setIsLanguageDropdownOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    தமிழ்
+                  </button>
+                </div>
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <div className="flex items-center sm:hidden">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <span className="sr-only">Open main menu</span>
-                {isMenuOpen ? <FaTimes className="block h-6 w-6" /> : <FaBars className="block h-6 w-6" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            {/* Cart */}
+            <Link to="/cart" className="relative text-gray-600 hover:text-agri-primary">
+              <FiShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-agri-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="sm:hidden">
-          <div className="space-y-1 px-2 pb-3 pt-2">
-            <Link to="/" className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100">
-              Home
-            </Link>
-            <Link
-              to="/marketplace"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
-            >
-              Marketplace
-            </Link>
-            <Link
-              to="/about"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
-            >
-              Contact
-            </Link>
-          </div>
-
-          <div className="border-t border-gray-200 pb-3 pt-4">
+            {/* Auth Buttons or User Menu */}
             {isAuthenticated ? (
-              <div className="space-y-1 px-4">
-                <div className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">{user.name}</div>
-                    <div className="text-sm font-medium text-gray-500">{user.email}</div>
-                  </div>
-                </div>
-
-                <Link
-                  to={getDashboardLink()}
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  Dashboard
-                </Link>
-
-                {user.role === "buyer" && (
-                  <Link
-                    to="/buyer/cart"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
-                  >
-                    Cart
-                  </Link>
-                )}
-
+              <div className="relative">
                 <button
-                  onClick={handleLogout}
-                  className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center text-gray-600 hover:text-agri-primary"
                 >
-                  Logout
+                  <FiUser className="h-5 w-5 mr-1" />
+                  <span className="text-sm">{user?.name?.split(" ")[0] || "User"}</span>
                 </button>
+
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                    <Link to={getDashboardLink()} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Dashboard
+                    </Link>
+                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="space-y-1 px-4">
-                <Link
-                  to="/login"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
-                >
+              <div className="flex items-center space-x-2">
+                <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-agri-primary">
                   Login
                 </Link>
                 <Link
-                  to="/register"
-                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100"
+                  to="/signup"
+                  className="text-sm font-medium bg-agri-primary text-white px-4 py-2 rounded-md hover:bg-agri-dark transition-colors"
                 >
-                  Register
+                  Sign Up
                 </Link>
               </div>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-4">
+            <Link to="/cart" className="relative text-gray-600">
+              <FiShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-agri-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-600 hover:text-agri-primary focus:outline-none"
+            >
+              {isMenuOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white shadow-lg">
+          <div className="px-4 pt-2 pb-4 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname === link.href
+                    ? "bg-agri-primary/10 text-agri-primary"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-agri-primary"
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+
+            {/* Language Options */}
+            <div className="px-3 py-2 border-t border-gray-100 mt-2">
+              <p className="text-sm font-medium text-gray-500 mb-2">Language</p>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setLanguage("English")}
+                  className={`block w-full text-left px-3 py-2 rounded-md text-sm ${
+                    language === "English" ? "bg-agri-primary/10 text-agri-primary" : "text-gray-600"
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setLanguage("සිංහල")}
+                  className={`block w-full text-left px-3 py-2 rounded-md text-sm ${
+                    language === "සිංහල" ? "bg-agri-primary/10 text-agri-primary" : "text-gray-600"
+                  }`}
+                >
+                  සිංහල
+                </button>
+                <button
+                  onClick={() => setLanguage("தமிழ்")}
+                  className={`block w-full text-left px-3 py-2 rounded-md text-sm ${
+                    language === "தமிழ்" ? "bg-agri-primary/10 text-agri-primary" : "text-gray-600"
+                  }`}
+                >
+                  தமிழ்
+                </button>
+              </div>
+            </div>
+
+            {/* Auth Buttons or User Menu */}
+            <div className="px-3 py-2 border-t border-gray-100">
+              {isAuthenticated ? (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-gray-500 mb-2">Account</p>
+                  <Link
+                    to={getDashboardLink()}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-agri-primary"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-agri-primary"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 hover:text-agri-primary"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <Link
+                    to="/login"
+                    className="block text-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-50"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="block text-center px-3 py-2 rounded-md text-sm font-medium bg-agri-primary text-white hover:bg-agri-dark"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
-    </nav>
+    </header>
   )
 }
 
